@@ -1,5 +1,5 @@
 # About the project
 
-This is a course organized by the Doctoral School of Social Sciences and Centre for Research Methods, University of Helsinki. The theme of the course is open data, open science and data science. The aim of this course is to understand the concepts of open data and open science and learn how to use some of the open tools available (=data science). Students will learn to analyze and visualize data with sophisticated statistical methods with these open acces tools and get familiar with the concept of reproduciable science.   
+This course "IODS-Introduction to Open Data Science" is organized by the Doctoral School of Social Sciences and Centre for Research Methods, University of Helsinki. The theme of the course is open data, open science and data science. The aim of this course is to understand the concepts of open data and open science and learn how to use some of the open tools available (=data science). Students will learn to analyze and visualize data with sophisticated statistical methods with these open acces tools and get familiar with the concept of reproduciable science.   
 
 Link to my GitHub repository: https://github.com/anninahaverinen/IODS-project
