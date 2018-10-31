@@ -1,5 +1,6 @@
 ---
 title: Rstudio Exercise1
+output: github_document
 ---
 
 This introductory exercise involved getting familiar with R and  

@@ -47,7 +47,6 @@ str(learning2014)
 dim(learning2014)
 head(learning2014)
 
-#Remember R is case sensitive
 #Task compleated, new analysis dataset learning2014 with 7 variables and 166 observations
 
 #saving the dataset on my computer, in github/iods/data
@@ -58,3 +57,6 @@ write.table(learning2014,file="learning2014.txt")
 getwd()
 # current directory: "/Users/Annina/Documents/GitHub/IODS-project/Data"
 
+learning2014 <- read.table("/Users/Annina/Documents/GitHub/IODS-project/Data/learning2014.txt")
+str(learning2014)
+dim(learning2014)
