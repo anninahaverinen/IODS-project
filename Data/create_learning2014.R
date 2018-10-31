@@ -39,7 +39,7 @@ learning_2014 <- filter(learning_2014, Points>0)
 
 #new dataset, columns to keep, use of select(), one_of(), first create vector of the columns to keep
 
-keep_columns <-  c ("surf","stra","deep","Age","Attitude","gender","Points")
+keep_columns <-  c ("gender","Age","Points","Attitude","surf","deep","stra")
 learning2014 <- select(learning_2014, one_of(keep_columns))
 
 #looking at the new data set for analysis, named learning2014
@@ -58,11 +58,3 @@ write.table(learning2014,file="learning2014.txt")
 getwd()
 # current directory: "/Users/Annina/Documents/GitHub/IODS-project/Data"
 
-# funny order so
-
-learn2014<-learning2014[,c(6,4,7,5,2,3,1)]
-str(learn2014)
-learn2014<-learn2014[,c(1,5,2,3,4,6,7)]
-str(learn2014)
-
-write.table(learning2014, file="learn2014.txt")
