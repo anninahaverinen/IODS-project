@@ -1,6 +1,6 @@
 #Annina Haverinen
 #IODS-Project
-#1.11.2018
+#7.11.2018
 #Excercise 3: Logistic regression, data wrangling
 #Data source:https://archive.ics.uci.edu/ml/datasets/Student+Performance
 getwd() #get directory
