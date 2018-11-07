@@ -18,8 +18,7 @@ output:
 ```
   
 ***
-  
-```{r child = ""}
+```{r child= "chapter2.Rmd"}
 ```
 
 ***
