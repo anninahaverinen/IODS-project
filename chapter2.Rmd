@@ -2,28 +2,21 @@
 Annina Haverinen, 7.11.2018
 IODS-Project, Excercise 2
 
-Getting started: Reading the data "learning2014" from local disk, the orginial data has been wrangled.
+Getting started: Reading the data "learning2014" from local disk, the orgiginal data has been wrangled.
 
 The learning2014 is a subset of a data from a study investigating the  realationship between learning approaches and student achievements. The data learning2014 consists of  7 variables: gender (F/M), age, exam points, global attitude towards statistics, questions on surface learning, deep learning and strategic learning.There are 166 observations in this dataset representing 166 students. 
-
 ```{r}
 learning2014<-read.table("/Users/Annina/Documents/GitHub/IODS-project/Data/learning2014.txt")
 ```
-
 Looking at the dimensions,structure and first observations of the data.
-
 ```{r}
 dim(learning2014) # gives the dimensions of the dataset: 166 observations of 7 variables.
 str(learning2014) # gives the names of the variables, type of variable (factorial with number of levels, numeric or integer) and the first observations
-head(learning2014) # gives a table of the first 6 observations of the dataframe
 ```
-
 Next a summary of the variables:
-
 ```{r}
 summary(learning2014)
 ```
-
 From the summary we can see descriptive information of the variables. For factoral variables the quantity of the observations/level is given and for numeric variables the min-max values, 1st and 3rd quantile, mean and median. From this we can get an overview of the distribiution of the data/variable. From the summary it can be seen that "age" is skewed but the other variables quite normally distributed (normal distribiuton: mean almost equal to the median, quntiles symmetrical around mean, min-max symmetrical).
 
 To get an idea over the possible relationships between the variables in the data we plot them in a plot matrix. 
@@ -34,18 +27,14 @@ library(GGally) #installed for graphics
 ```{r}
 ggpairs(learning2014, lower = list(combo = wrap("facethist", bins = 20))) # plot matrix of the data
 ```
-
 The plot matrix gives us scatter plots of all possible combinations of the variables in the data fram. The matrix also gives correlation coefficients for the combinations and density lines for estimation of distribition. We can visually interpret the distribution of the variables, in this case the distribiutions are more or less normal for the other variables than "age". Below a correlation matrix. 
-
 ```{r}
 p2<- ggcorr(learning2014 [-1]) # plots a correlation matrix, helps to visualize the correlated variables in the data set 
 p2
 ```
-
 From these plots we can see that see that the "Attitude"-"Points" interaction has the highest correlation coefficient. We see that "Attitude" and "stra" are positively correlated with "Points" and that "deep" is slightly negatively correlated with "Points". 
 
 In this multiple regression model (named LM1) I therfore include "Attitude", "stra" and "deep" (3 variables required in the excercise) as explanatory variables to "Points". In the next model (LM2) I include only "Attitude" and "stra", these two being positvely correlated to "Points". The last model (LM3) is a simple linear regression model with only one explanatory variable, "Attitude".  
-
 ```{r}
 LM1<-lm(Points~Attitude+stra+deep, data=learning2014) 
 LM1
@@ -72,7 +61,6 @@ F test of the overall significance of the model: p value for the F statistic sho
 From the given output on the model I would exlude "deep" from the multiple regression model and make the model simpler with only two explinatory models. 
 
 LM2: "Attitude" and "stra" as explainatory variable for "Points"
-
 ```{r}
 LM2<-lm(Points~Attitude+stra, data=learning2014)
 LM2
@@ -91,23 +79,18 @@ confint(LM3) # gives confidence intervalls of the coeffiecient estimate
 LM3: Rsquared is essentieally unaffected 19% but F statistic 38.61, with a p value smaller that the estimate coefficient of "Attitude". I would conclude that this simple model is better than those with multiple explinatory variables.
 
 Below a scatterplot with the regression line (with CI95% pictured light grey around the regression line) plotted for the LM2 and LM3 models. 
-
 ```{r}
 qplot(Attitude+stra, Points, data = learning2014) + geom_smooth(method = "lm")
 qplot(Attitude, Points, data = learning2014) + geom_smooth(method = "lm")
 ```
-
 Validation of the data for the model: Below the regression models LM2 and LM3 are subjected to diagnostic plots.
-
 ```{r}
 plot(LM2, which = c(1,2,5))
 plot(LM3, which= c(1,2,5))
 ```
-
 The diagnostic test are used to see how well our data fits the model. 
 1. Residual vs fitted values: Shows the residuals variance of error. In this case quite a good fit, we see no pattern in in the scatter plot. 
 2. Normal Q-Q plot: shows if residuals from our model are normally distribiuted, witch is an assumtion for the model. In this case some deviation from normal can be seen at extremes, but I interpret that data fits model well enough.
 3.Residuals vs leverage: Helps us find influencial subjects that could have an impact on the regression line (=not all outliers are influencial i.e determine the regression line). Here no cases are seen outside cooks distance, i.e. there are not influencial extremes in the data. 
-
 
 The interpretation is that the data fits the regression model (both the multiple (2 variables) and simple regression model) and that the model is valiated for the data. 
