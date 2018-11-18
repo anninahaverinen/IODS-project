@@ -1,0 +1,134 @@
+--- 
+title: "Chapter 3" 
+author: "Annina Haveinen" 
+date: "11/3/2018" 
+output: html_document 
+--- 
+
+
+# Logisitic regression and cross validationn
+
+This exercise is based on a data set about student achievement
+in secondary education in two Portuguese schools. Data includes student grades,demographic, social and school related features and it was collected by using school reports and questionnaires. The data "alc" is a subset of this data, with alcohol use on weekdays and weekends combined by averaging and high use defined >2 (scale: 1 = very low to 5 very high). Links to [original
+dataset](https://archive.ics.uci.edu/ml/datasets/Student+Performance) and
+[publication](http://www3.dsi.uminho.pt/pcortez/student.pdf).
+
+###*Exploring the data* 
+
+```{r setup, include=FALSE} 
+getwd() 
+``` 
+Readning the wrangled data from local disk. 
+
+```{r}
+alc<-read.table("/Users/Annina/Documents/GitHub/IODS-project/Data/alc.txt",sep=";") 
+``` 
+Next lets explore the data: 
+```{r} 
+dim(alc) 
+colnames(alc) 
+``` 
+The data set is composed of 35 variables and 382 observations(ie.382 students)
+
+```{r} 
+summary(alc$high_use) # = alc_use >2 = TRUE 
+``` 
+The response variable of interest is the binary variable "high_use" (TRUE/FALSE) correspoinding to alcohol use >2 on a scale from 1-5.
+
+My hypotesis is that high alcohol use is correlated to the variables; "goout","sex" and "abscences" and that these could be used in a model for predicting high use.
+My hypothesis is that male students drink more than female students. People who go out more drink more alcohol and that people that have more abscences from school drink more alcohol. 
+
+```{r include=FALSE} 
+library(tidyr) 
+library(ggplot2)
+library(GGally) 
+library(dplyr) 
+``` 
+Lets look at the chosen variables: 
+
+```{r} 
+p1 <- ggplot(alc, aes(x=high_use, y = goout, col=sex))+geom_boxplot()+ylab("Going
+out")+xlab("Alcohol high use")+ggtitle("Student going out by alcohol use and sex") 
+p1 
+``` 
+In this boxplot we can se that male students go out more than
+female and that more going out seems positively related to high alcohol use.
+
+```{r} 
+p2 <- ggplot(alc, aes(high_use, absences, col=sex))+ylab("Absences")+xlab("Alcohol high use")+geom_boxplot()+ggtitle("Alcohol use by student absences and sex")
+
+p2 #numeric 0-93 days
+``` 
+In this boxplot it looks like the students having high alcohol use have somewhat more absences. 
+```{r} 
+table(alc$high_use,alc$sex)
+``` 
+In this table we see that of the male students 38% and 21% of the women fall in the high alcohol use group. Of the whole data 30% are in the high use group.
+
+```{r} 
+p3 <- ggplot(alc, aes(high_use, col=sex))+geom_bar()+ylab(
+"Students")+xlab("Alcohol high use")+ggtitle("Alcohol high use by sex") 
+p3
+```
+In this barplot we se that more men than women are in the high use group.
+
+###*Logistic regression model* 
+```{r} 
+model1<- glm(high_use~absences+sex+goout,
+data=alc, family="binomial") 
+summary(model1) 
+coef(model1) 
+ORmodel1<-coef(model1)%>%exp 
+CImodel1<-confint(model1)%>%exp
+ORCImodel1<-cbind(ORmodel1,CImodel1) 
+ORCImodel1 
+``` 
+The residuals are more or less normally distribiuted and the median is close to 0. The coeffients for the variables all show statistical significance in the model. This means these are highly predictive variables of being judged to have high alcohol use. 
+
+
+###*Predictions*
+```{r} 
+probabilities <- predict(model1, type="response")
+alc<-mutate(alc,probability=probabilities)
+alc<-mutate(alc, prediction =probability>0.5)
+dim(alc)
+select(alc, sex,goout,absences,probability,prediction)%>%tail(10) 
+```
+```{r} 
+table(high_use=alc$high_use,prediction=alc$prediction) #confusion matrix #302 predictions wright/ 382 observations
+``` 
+From this confusion matrix we can calculate that this model predicts 302/382 predictions right. 79% right, 21% wrong predicitions. 
+
+```{r}
+g <- ggplot(alc, aes(x = probability, y = high_use,
+col=prediction))+geom_point() 
+g
+``` 
+In this picture we see the same thing, the observations plotted the probability and prediction by high_use.
+
+```{r} 
+table(high_use = alc$high_use, prediction =
+alc$prediction)%>%prop.table()%>%addmargins()
+```
+###*Accurancy of the Model*
+
+Loss of function: wrongly classified observations with this model
+```{r} 
+loss_func<-function(class,prob){
+  n_wrong <-abs(class-prob)>0.5
+  mean(n_wrong)
+}
+#mean number of wrongly classified observations = mean prediction error; 24,6% wrong predictions with this model on training data
+
+loss_func(class = alc$high_use, prob = alc$probability) 
+```
+20.9% are classified wrong by the prediction of this model. 
+
+###*Cross-Validation* 
+
+```{r} 
+library(boot) 
+cv <-cv.glm(data = alc, cost = loss_func, glmfit = model1, K = 10) 
+cv$delta[1] 
+```
+22% are classfied wrong. 
