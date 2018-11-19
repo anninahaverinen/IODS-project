@@ -6,7 +6,7 @@ output: html_document
 --- 
 
 
-# Logisitic regression and cross validationn
+# Logisitic regression and cross validation
 
 This exercise is based on a data set about student achievement
 in secondary education in two Portuguese schools. Data includes student grades,demographic, social and school related features and it was collected by using school reports and questionnaires. The data "alc" is a subset of this data, with alcohol use on weekdays and weekends combined by averaging and high use defined >2 (scale: 1 = very low to 5 very high). Links to [original
