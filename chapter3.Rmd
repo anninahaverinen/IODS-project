@@ -83,8 +83,9 @@ CImodel1<-confint(model1)%>%exp
 ORCImodel1<-cbind(ORmodel1,CImodel1) 
 ORCImodel1 
 ``` 
-The residuals are more or less normally distribiuted and the median is close to 0. The coeffients for the variables all show statistical significance in the model. This means these are highly predictive variables of being judged to have high alcohol use. 
+The residuals are more or less normally distribiuted and the median is close to 0. The coeffients for the variables all show statistical significance in the model. This means these are significantly predictive variables of high alcohol use. 
 
+Male sex is associated with a 2.6 times larger liklihood of high alcohol use than female sex. "goout" is associated with 2.07 times the odds of high alcohol use per increase in unit of "go out" and absences with 1.09 times the odds with one increase of unit in absences. 
 
 ###*Predictions*
 ```{r} 
@@ -104,7 +105,7 @@ g <- ggplot(alc, aes(x = probability, y = high_use,
 col=prediction))+geom_point() 
 g
 ``` 
-In this picture we see the same thing, the observations plotted the probability and prediction by high_use.
+In this picture we see the same thing, the observations plotted by the probability and prediction and high_use. From this plot we can see that the model predicts low alcohol better than high alcohol use. 
 
 ```{r} 
 table(high_use = alc$high_use, prediction =
@@ -121,8 +122,10 @@ loss_func<-function(class,prob){
 #mean number of wrongly classified observations = mean prediction error; 24,6% wrong predictions with this model on training data
 
 loss_func(class = alc$high_use, prob = alc$probability) 
+loss_func(class = alc$high_use, prob = 0)
 ```
 20.9% are classified wrong by the prediction of this model. 
+Guessing produces 29,8% wrong predicitions. This model is better than simply guessing. 
 
 ###*Cross-Validation* 
 
@@ -131,4 +134,4 @@ library(boot)
 cv <-cv.glm(data = alc, cost = loss_func, glmfit = model1, K = 10) 
 cv$delta[1] 
 ```
-22% are classfied wrong. 
+22% is the mean predicition error of the model. 
