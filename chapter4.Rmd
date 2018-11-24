@@ -4,13 +4,19 @@ author: "Annina Haveinen"
 date: "11/19/2018"
 output: html_document
 ---
+
+# Classification and Clustering
+Annina Haverinen
+19.11.2018
+
+
 Loading the MASS "Boston" dataset already loaded in R.
 [Link to dataset](https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/Boston.html)  
 This is a data set about Housing Values in Suburbs of Boston.
 
-Harrison, D. and Rubinfeld, D.L. (1978) Hedonic prices and the demand for clean air. < em >J. Environ. Economics and Management < b >5, 81???102.
+Harrison, D. and Rubinfeld, D.L. (1978) Hedonic prices and the demand for clean air. J. Environ. Economics and Management 5, 81-102.
 
-Belsley D.A., Kuh, E. and Welsch, R.E. (1980) < em >Regression Diagnostics. Identifying Influential Data and Sources of Collinearity. New York: Wiley
+Belsley D.A., Kuh, E. and Welsch, R.E. (1980). Regression Diagnostics. Identifying Influential Data and Sources of Collinearity. New York: Wiley
 
 Variables in the dataset:
 
@@ -49,7 +55,7 @@ gather(Boston) %>%
 Visualisation of the variables. 
 the variable rm is the only one looking normally distribiuted, the others seem rather skewed. 
 
-###Correlation plots
+##Correlation plots
 ```{r}
 library(tidyr)
 library("ggplot2")
@@ -66,7 +72,7 @@ p2
 ```
 Looking at the correlations plot we can see that positively correlated variables are; rad (index of accesibility to radial highways), lstat (lower status of the population, percent) tax (full-value property-tax rate per $10,000) to crim (our variable of interest is crimerate per capita by town). Negatively associated with crim are medv (median value of owner-occupied homes in  $1000s) and dis (weighted mean of distances to five Boston employment centres).
 
-####Scaling the dataset 
+##Scaling the dataset 
 ```{r}
 scaled_boston <- scale(Boston)
 summary(scaled_boston)
@@ -135,14 +141,13 @@ table(correct = lda.pred$class, prediction = correct_classes)%>%addmargins()
  med_high crime was predicted in 18/24  
  high crime was predicted in 26/27  
  
-## Clustering
 ```{r}
 library(MASS)
 data("Boston")
 scaled_boston <- scale(Boston)
 ```
 
-###K-means clustering
+##K-means clustering
 ```{r}
 #determining the number of clusters
 wss <- (nrow(scaled_boston)-1)*sum(apply(scaled_boston,2,var))
