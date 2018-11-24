@@ -1,0 +1,213 @@
+---
+title: "Classification and Clustering"
+author: "Annina Haveinen"
+date: "11/19/2018"
+output: html_document
+---
+Loading the MASS "Boston" dataset already loaded in R.
+[Link to dataset](https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/Boston.html)  
+This is a data set about Housing Values in Suburbs of Boston.
+
+Harrison, D. and Rubinfeld, D.L. (1978) Hedonic prices and the demand for clean air. < em >J. Environ. Economics and Management < b >5, 81???102.
+
+Belsley D.A., Kuh, E. and Welsch, R.E. (1980) < em >Regression Diagnostics. Identifying Influential Data and Sources of Collinearity. New York: Wiley
+
+Variables in the dataset:
+
+1. crim= per capita crime rate by town.   
+2. zn = proportion of residential land zoned for lots over 25,000 sq.ft.  
+3. indus = proportion of non-retail business acres per town.  
+4. chas = Charles River dummy variable (= 1 if tract bounds river; 0 otherwise).  
+5. nox = nitrogen oxides concentration (parts per 10 million).  
+6. rm = average number of rooms per dwelling.  
+7. age = proportion of owner-occupied units built prior to 1940.
+8. dis = weighted mean of distances to five Boston employment centres.  
+9. rad = index of accessibility to radial highways.  
+10. tax = full-value property-tax rate per $10,000.  
+11. ptratio = pupil-teacher ratio by town.  
+12. black = 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town.  
+13. lstat = lower status of the population (percent).  
+14. medv = median value of owner-occupied homes in $1000s.  
+```{r}
+library(MASS) 
+data("Boston")
+dim(Boston) #506 observation of 14 variables
+colnames(Boston)
+```
+Names of the variables in the data  
+506 observation of 14 variables
+```{r, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+```{r} 
+gather(Boston) %>% 
+  ggplot(aes(value)) + facet_wrap("key", scales= "free") + geom_histogram()
+```
+Visualisation of the variables. 
+the variable rm is the only one looking normally distribiuted, the others seem rather skewed. 
+
+###Correlation plots
+```{r}
+library(tidyr)
+library("ggplot2")
+library("GGally")
+library("corrplot")
+cor_matrix <- cor(Boston)%>%round(2)
+cor_matrix
+p1 <- ggcorr(cor_matrix,geom="circle")
+# correlation plot matrix 
+p1
+?ggcorr
+p2<- corrplot(cor_matrix, method = "circle",type="upper",cl.pos="b",tl.pos="d",tl.cex = 0.6)
+p2
+```
+Looking at the correlations plot we can see that positively correlated variables are; rad (index of accesibility to radial highways), lstat (lower status of the population, percent) tax (full-value property-tax rate per $10,000) to crim (our variable of interest is crimerate per capita by town). Negatively associated with crim are medv (median value of owner-occupied homes in  $1000s) and dis (weighted mean of distances to five Boston employment centres).
+
+####Scaling the dataset 
+```{r}
+scaled_boston <- scale(Boston)
+summary(scaled_boston)
+class(scaled_boston)
+scaled_boston <- as.data.frame(scaled_boston)
+class(scaled_boston)
+```
+```{r}
+summary(scaled_boston$crim)
+crim_vector <- quantile(scaled_boston$crim) #new crime variable
+crim_vector
+crime <-cut(scaled_boston$crim, breaks = crim_vector, include.lowest = TRUE, labels = c("low", "med_low", "med_high", "high"))
+table(crime)
+```
+```{r}
+scaled_boston <- dplyr::select(scaled_boston, -crim)
+scaled_boston <- data.frame(scaled_boston,crime)
+```
+
+```{r}
+n <- nrow(scaled_boston)
+n
+train <- sample(n, size = n * 0.8)
+train_set <- scaled_boston[train,] # training set with 80% of obs.
+dim(train_set)
+test <- scaled_boston [-train,] # test set with 20% of obs.
+dim(test)
+correct_classes <- test$crime
+test <- dplyr::select(test, -crime)
+```
+##Linear discriminant analysis
+
+- classification method to find the linare combination of the variables that separates the target variable classes. 
+- in this exercis the target variable is crime-rate
+
+```{r}
+lda1<-lda(crime~., data=train_set)
+lda1
+```
+
+```{r}
+classes <- as.numeric(train_set$crime) # 1,2,3,4 in stead of low,med_low,med_high, high
+```
+##LDA biplot
+```{r}
+lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "orange", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+plot(lda1, dimen = 2, col = classes, pch = classes)
+lda.arrows(lda1, myscale = 1)
+```
+##Predict with LDA
+```{r}
+# predict classes with test data
+lda.pred <- predict(lda1, newdata = test)
+# cross tabulate the results
+table(correct = lda.pred$class, prediction = correct_classes)%>%addmargins()
+```
+ Prediction was right in 56% of test set  
+ high crime was prdicted in 16/18 cases  
+ med_high crime was predicted in 18/24  
+ high crime was predicted in 26/27  
+ 
+## Clustering
+```{r}
+library(MASS)
+data("Boston")
+scaled_boston <- scale(Boston)
+```
+
+###K-means clustering
+```{r}
+#determining the number of clusters
+wss <- (nrow(scaled_boston)-1)*sum(apply(scaled_boston,2,var))
+for (i in 2:15) wss[i] <- sum(kmeans(scaled_boston, 
+  	centers=i)$withinss)
+plot(1:15, wss, type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+
+km<- kmeans(scaled_boston,3)
+summary(km)
+km1 <- kmeans(scaled_boston, 5)
+summary(km1)
+```
+
+3 clusters would be appropriate. 
+
+```{r, include=FALSE}
+library(ggplot2)
+library(GGally)
+```
+
+```{r}
+pairs(scaled_boston, col=km$cluster)
+````
+
+##BONUS
+
+```{r}
+data("Boston")
+scaled_boston <- scale(Boston)
+dim(scaled_boston)
+km_bonus <- kmeans(scaled_boston, 4)
+class(scaled_boston)
+scaled_boston <- as.data.frame(scaled_boston)
+class(scaled_boston)
+lda2 <- lda(km_bonus$cluster~., data = scaled_boston)
+lda2
+classes1 <- as.numeric(km_bonus$cluster)
+```
+
+```{r}
+lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "orange", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+plot(lda2, dimen = 2, col = classes1, pch = classes1)
+lda.arrows(lda2, myscale = 1)
+```
+##superbonus
+```{r}
+model_predictors <- dplyr::select(train_set, -crime)
+# check the dimensions
+dim(model_predictors)
+dim(lda1$scaling)
+# matrix multiplication
+matrix_product <- as.matrix(model_predictors) %*% lda1$scaling
+matrix_product <- as.data.frame(matrix_product)
+```
+```{r}
+library("plotly")
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color = train_set$crime)
+```
+
+
