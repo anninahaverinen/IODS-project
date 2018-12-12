@@ -1,5 +1,6 @@
 library(dplyr)
 library(tidyr)
+
 BPRS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BPRS.txt", sep  =" ", header = T)
 RATS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt", sep = "\t", header = T)                   
 
@@ -30,4 +31,6 @@ RATSL <- RATS%>% gather(key = WD, value = Weight, -ID, -Group)%>%
   mutate(Time = as.integer(substr(WD,3,4))) 
 glimpse(RATSL)
 
-
+getwd()
+write.table(BPRSL, "BPRSL.txt")
+write.table(RATSL, "RATSL.txt")
